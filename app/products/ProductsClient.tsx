@@ -1,13 +1,12 @@
 // app/products/ProductsClient.tsx
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import ProductCard from "../components/ProductCard";
 import ChatSheet from "../components/ChatSheet";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Product } from "@/lib/schemas";
 import { v4 as uuidv4 } from "uuid";
-import { useEffect } from "react";
 
 export function useAnonId() {
   useEffect(() => {
@@ -18,6 +17,7 @@ export function useAnonId() {
 
   return localStorage.getItem("anonId");
 }
+
 export default function ProductsClient({ data }: { data: { products: Product[]; error?: boolean } }) {
   const [open, setOpen] = useState(false);
   const [activeProduct, setActiveProduct] = useState<Product | null>(null);
@@ -27,10 +27,10 @@ export default function ProductsClient({ data }: { data: { products: Product[]; 
     setOpen(true);
   }
 
-  // ❌ Error state
+  // Error state
   if (data.error) {
     return (
-      <div className="max-w-6xl mx-auto px-4 py-10">
+      <div className="max-w-7xl mx-auto px-6 py-12">
         <Alert variant="destructive">
           <AlertTitle>Error</AlertTitle>
           <AlertDescription>
@@ -43,23 +43,39 @@ export default function ProductsClient({ data }: { data: { products: Product[]; 
 
   const products = data.products;
 
-  // 🟡 Empty state
+  // Empty state
   if (!products || products.length === 0) {
     return (
-      <div className="max-w-6xl mx-auto px-4 py-10 text-center text-muted-foreground">
+      <div className="max-w-7xl mx-auto px-6 py-12 text-center text-muted-foreground">
         No products found.
       </div>
     );
   }
 
-  // 🟢 Success
   return (
-    <div className="max-w-6xl mx-auto px-4 py-10 space-y-6">
-      <h1 className="text-2xl font-semibold">All Loan Products</h1>
+    <div className="max-w-7xl mx-auto px-6 py-12">
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-2xl md:text-3xl font-semibold tracking-tight">All Loan Products</h1>
+        <p className="text-sm text-muted-foreground">Showing {products.length} products</p>
+      </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-        {products.map((p) => (
-          <ProductCard key={p.id} product={p} onAsk={handleAsk} />
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        {products.map((p, i) => (
+          <article
+            key={p.id}
+            aria-labelledby={`product-${p.id}`}
+            className="
+              bg-white border border-gray-100 rounded-2xl
+              shadow-[0_6px_18px_rgba(16,24,40,0.04)]
+              hover:shadow-[0_12px_30px_rgba(16,24,40,0.06)]
+              transition-shadow duration-200
+              p-5 flex flex-col gap-4
+              min-h-[420px]
+            "
+            style={{ animationDelay: `${i * 40}ms` }}
+          >
+            <ProductCard product={p} onAsk={handleAsk} />
+          </article>
         ))}
       </div>
 

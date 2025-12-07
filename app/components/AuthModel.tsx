@@ -1,9 +1,11 @@
+// app/components/AuthModal.tsx
 "use client";
 
 import { useState } from "react";
 import { supabaseBrowser } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
-import { Alert } from "@/components/ui/alert"
+import { Alert } from "@/components/ui/alert";
+
 type AuthMode = "login" | "signup";
 
 interface AuthModalProps {
@@ -18,7 +20,8 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
-  const[alertMsg,setAlertMsg]=useState(false);
+  const [alertMsg, setAlertMsg] = useState(false);
+
   if (!isOpen) return null;
 
   async function handleAuth(e: React.FormEvent) {
@@ -44,82 +47,90 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
       if (error) throw error;
 
       if (mode === "signup") setAlertMsg(true);
-        
+
       onClose();
-      router.refresh(); // refresh to update session-dependent UI
+      router.refresh();
     } catch (err: any) {
-      setErrorMsg(err.message);
+      setErrorMsg(err.message || "Authentication failed");
     } finally {
       setLoading(false);
     }
   }
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <div className="bg-white p-6 rounded shadow-lg w-[90%] max-w-md relative">
+    <div className="fixed inset-0 z-50 flex items-center justify-center">
+      <div
+        className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+        onClick={onClose}
+      />
+
+      <div className="relative w-full max-w-md bg-white rounded-2xl shadow-xl p-6 z-10">
         <button
-          className="absolute top-2 right-2 text-gray-500"
+          aria-label="Close"
+          className="absolute top-3 right-3 text-gray-500 hover:text-gray-800"
           onClick={onClose}
         >
           ✕
         </button>
 
-        <h2 className="text-xl font-bold mb-4">
-          {mode === "login" ? "Login" : "Sign Up"}
-        </h2>
+        <h2 className="text-xl font-semibold mb-3">{mode === "login" ? "Login" : "Create an account"}</h2>
 
-        <form onSubmit={handleAuth} className="flex flex-col gap-4">
-          <input
-            type="email"
-            required
-            placeholder="Email"
-            className="border p-2"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
-          <input
-            type="password"
-            required
-            placeholder="Password"
-            className="border p-2"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
+        <form onSubmit={handleAuth} className="flex flex-col gap-3">
+          <label className="text-sm">
+            <input
+              type="email"
+              required
+              placeholder="Email"
+              className="w-full border border-gray-200 p-2 rounded-md"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+          </label>
 
-          <button
-            type="submit"
-            className="bg-blue-500 text-white p-2 rounded"
-            disabled={loading}
-          >
-            {loading ? "Processing..." : mode === "login" ? "Login" : "Sign Up"}
-          </button>
+          <label className="text-sm">
+            <input
+              type="password"
+              required
+              placeholder="Password"
+              className="w-full border border-gray-200 p-2 rounded-md"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+          </label>
+
+          <div className="flex gap-2 mt-1">
+            <button
+              type="submit"
+              className="flex-1 bg-blue-600 text-white py-2 rounded-md disabled:opacity-60"
+              disabled={loading}
+            >
+              {loading ? (mode === "login" ? "Signing in…" : "Creating…") : (mode === "login" ? "Login" : "Sign up")}
+            </button>
+          </div>
         </form>
 
-        {errorMsg && <p className="text-red-500 mt-3">{errorMsg}</p>}
+        {errorMsg && <p className="text-sm text-red-600 mt-3">{errorMsg}</p>}
+
         {alertMsg && (
-          <Alert variant="default" className="mt-4">
-            <p>Please check your email for a verification link.</p>
-          </Alert>
+          <div className="mt-3">
+            <Alert variant="default">
+              <div className="text-sm">Please check your email for a verification link.</div>
+            </Alert>
+          </div>
         )}
-        
-        <p className="mt-3 text-sm text-gray-600">
+
+        <p className="mt-4 text-sm text-gray-600">
           {mode === "login" ? (
             <>
               Don't have an account?{" "}
-              <button
-                className="text-blue-500 underline"
-                onClick={() => setMode("signup")}
-              >
-                Sign Up
+              <button className="text-blue-600 underline" onClick={() => setMode("signup")}>
+                Sign up
               </button>
             </>
           ) : (
             <>
               Already have an account?{" "}
-              <button
-                className="text-blue-500 underline"
-                onClick={() => setMode("login")}
-              >
+              <button className="text-blue-600 underline" onClick={() => setMode("login")}>
                 Login
               </button>
             </>
